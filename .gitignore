@@ -31,7 +31,14 @@ api/data/
 *.swp
 *.swo
 *~
-.claude/
+
+# Claude Code - ignore personal settings, allow project config
+.claude/*
+!.claude/CLAUDE.md
+!.claude/settings.json
+!.claude/rules/
+!.claude/skills/
+!.claude/hooks/
 
 # OS specific files
 .DS_Store
