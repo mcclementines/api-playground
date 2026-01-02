@@ -62,6 +62,7 @@ func main() {
 	ln, err := net.Listen("tcp", srv.Addr)
 	if err != nil {
 		logger.Error("listen failed", "error", err)
+		os.Exit(1)
 	}
 
 	go func() {
