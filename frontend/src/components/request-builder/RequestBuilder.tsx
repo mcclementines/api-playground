@@ -27,21 +27,22 @@ export function RequestBuilder() {
     selectedEndpoint,
     requestForm,
     updateRequestForm,
-    resetRequestForm,
   } = useAppStore();
 
-  // Reset form when endpoint changes
+  // Initialize form when endpoint changes - but ONLY if it's currently empty
   useEffect(() => {
     if (selectedEndpoint) {
-      resetRequestForm();
-
-      // Initialize path params with empty values
+      // Only initialize if we don't have path params yet
       const pathParamNames = extractPathParams(selectedEndpoint.path);
-      const initialPathParams: Record<string, string> = {};
-      pathParamNames.forEach((name) => {
-        initialPathParams[name] = '';
-      });
-      updateRequestForm({ pathParams: initialPathParams });
+      const hasPathParams = Object.keys(requestForm.pathParams).length > 0;
+
+      if (!hasPathParams && pathParamNames.length > 0) {
+        const initialPathParams: Record<string, string> = {};
+        pathParamNames.forEach((name) => {
+          initialPathParams[name] = '';
+        });
+        updateRequestForm({ pathParams: initialPathParams });
+      }
     }
   }, [selectedEndpoint?.path, selectedEndpoint?.method]);
 

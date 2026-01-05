@@ -1,10 +1,12 @@
 import type { RequestHistoryEntry } from '../../types/request';
 import { cn } from '../../lib/utils';
-import { ArrowLeftCircle } from 'lucide-react';
+import { ArrowLeftCircle, Trash2, Copy, Check } from 'lucide-react';
+import { useState } from 'react';
 
 interface HistoryItemProps {
   entry: RequestHistoryEntry;
   onReplay: (entry: RequestHistoryEntry) => void;
+  onDelete: (id: string) => void;
 }
 
 const METHOD_STYLES: Record<string, string> = {
@@ -15,7 +17,9 @@ const METHOD_STYLES: Record<string, string> = {
   DELETE: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900',
 };
 
-export function HistoryItem({ entry, onReplay }: HistoryItemProps) {
+export function HistoryItem({ entry, onReplay, onDelete }: HistoryItemProps) {
+  const [copied, setCopied] = useState(false);
+
   const getStatusColor = (status: number): string => {
     if (status >= 200 && status < 300) return 'text-green-600 dark:text-green-400';
     if (status >= 300 && status < 400) return 'text-blue-600 dark:text-blue-400';
@@ -39,13 +43,32 @@ export function HistoryItem({ entry, onReplay }: HistoryItemProps) {
     return date.toLocaleDateString();
   };
 
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(entry.path);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(entry.id);
+  };
+
   return (
-    <button
+    <div
       onClick={() => onReplay(entry)}
-      className="w-full text-left p-3 hover:bg-muted/50 transition-colors group"
+      className="w-full text-left p-3 hover:bg-muted/50 transition-colors group relative cursor-pointer"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onReplay(entry);
+        }
+      }}
     >
       <div className="flex items-start gap-3">
-        {/* Method Badge */}
+        {/* Method Badge - Now a div instead of span for semantic correctness inside a button-like div if needed, though span is fine */}
         <span
           className={cn(
             "px-2 py-0.5 text-[10px] uppercase font-bold rounded-md border flex-shrink-0 mt-0.5",
@@ -72,12 +95,26 @@ export function HistoryItem({ entry, onReplay }: HistoryItemProps) {
             <span className="text-[10px] text-muted-foreground">
               {formatTime(entry.timestamp)}
             </span>
-            <span className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={handleCopy}
+                className="p-1 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors"
+                title="Copy path"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+              <button
+                onClick={handleDelete}
+                className="p-1 hover:bg-red-500/10 rounded-md text-muted-foreground hover:text-red-500 transition-colors"
+                title="Delete from history"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
               <ArrowLeftCircle className="w-3.5 h-3.5 text-brand-500" />
-            </span>
+            </div>
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }

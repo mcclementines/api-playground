@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAppStore } from '../../stores/app-store';
 import { useRequestHistory } from '../../hooks/useRequestHistory';
 import { HistoryItem } from './HistoryItem';
 import type { RequestHistoryEntry } from '../../types/request';
-import { X, Clock, Trash2 } from 'lucide-react';
+import { X, Clock, Trash2, Search } from 'lucide-react';
 
 interface RequestHistoryProps {
   isOpen: boolean;
@@ -11,13 +11,24 @@ interface RequestHistoryProps {
 }
 
 export function RequestHistory({ isOpen, onClose }: RequestHistoryProps) {
-  const { history, clearAll } = useRequestHistory();
-  const { loadFromHistory, selectService } = useAppStore();
+  const { history, clearAll, removeEntry } = useRequestHistory();
+  const { loadFromHistory } = useAppStore();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredHistory = useMemo(() => {
+    if (!searchQuery.trim()) return history;
+    const query = searchQuery.toLowerCase();
+    return history.filter(
+      (entry) =>
+        entry.service.toLowerCase().includes(query) ||
+        entry.method.toLowerCase().includes(query) ||
+        entry.path.toLowerCase().includes(query)
+    );
+  }, [history, searchQuery]);
 
   const handleReplay = (entry: RequestHistoryEntry) => {
     loadFromHistory(entry);
-    selectService(entry.service);
     onClose();
   };
 
@@ -64,6 +75,28 @@ export function RequestHistory({ isOpen, onClose }: RequestHistoryProps) {
           </button>
         </div>
 
+        {/* Search Bar */}
+        <div className="p-3 border-b border-border">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Filter history..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-muted/50 border border-border rounded-md py-1.5 pl-8 pr-3 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 transition-shadow"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* History List */}
         <div className="flex-1 overflow-y-auto">
           {history.length === 0 ? (
@@ -78,13 +111,18 @@ export function RequestHistory({ isOpen, onClose }: RequestHistoryProps) {
                 Send a request to see it here. History is saved locally.
               </p>
             </div>
+          ) : filteredHistory.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center px-6">
+              <p className="text-sm text-muted-foreground">No matches found for "{searchQuery}"</p>
+            </div>
           ) : (
             <div className="divide-y divide-border">
-              {history.map((entry) => (
+              {filteredHistory.map((entry) => (
                 <HistoryItem
                   key={entry.id}
                   entry={entry}
                   onReplay={handleReplay}
+                  onDelete={removeEntry}
                 />
               ))}
             </div>
@@ -97,8 +135,8 @@ export function RequestHistory({ isOpen, onClose }: RequestHistoryProps) {
             <button
               onClick={handleClearAll}
               className={`w-full px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-2 ${showClearConfirm
-                  ? 'bg-red-600 text-white hover:bg-red-700'
-                  : 'bg-muted text-foreground hover:bg-muted/80'
+                ? 'bg-red-600 text-white hover:bg-red-700'
+                : 'bg-muted text-foreground hover:bg-muted/80'
                 }`}
             >
               <Trash2 className="w-4 h-4" />

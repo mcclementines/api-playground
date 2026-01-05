@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { OpenAPISpec, EndpointSelection } from '../types/openapi';
-import type { RequestFormState, RequestHistoryEntry, ProxyResponse } from '../types/request';
+import type { RequestFormState, RequestHistoryEntry, ProxyResponse, HttpMethod } from '../types/request';
 
 interface AppState {
   // Services & Specs
@@ -32,6 +32,7 @@ interface AppState {
   setError: (error: string | null) => void;
   addToHistory: (entry: RequestHistoryEntry) => void;
   loadFromHistory: (entry: RequestHistoryEntry) => void;
+  removeFromHistory: (id: string) => void;
   clearHistory: () => void;
 }
 
@@ -102,24 +103,65 @@ export const useAppStore = create<AppState>((set) => ({
       return { history: newHistory };
     }),
 
-  loadFromHistory: (entry) => {
-
-    // Parse request form from history entry
-    const url = new URL(entry.request.path, 'http://dummy.com');
+  loadFromHistory: (entry: RequestHistoryEntry) => {
+    const { specs } = useAppStore.getState();
+    const spec = specs[entry.service];
+    let selectedEndpoint: EndpointSelection | null = null;
     const pathParams: Record<string, string> = {};
+
+    if (spec && spec.paths) {
+      // Find matching endpoint
+      for (const [pathTemplate, operations] of Object.entries(spec.paths)) {
+        if (operations && typeof operations === 'object') {
+          const operation = (operations as any)[entry.method.toLowerCase()];
+          if (operation) {
+            // Create regex for matching and parameter extraction
+            // e.g., /posts/{id} -> /posts/([^/]+)
+            const paramNames: string[] = [];
+            const normalizedTemplate = pathTemplate.replace(/\{([^}]+)\}/g, (_, paramName) => {
+              paramNames.push(paramName);
+              return '([^/]+)';
+            });
+            const regex = new RegExp(`^${normalizedTemplate}$`);
+
+            // The entry.path might have query params, strip them for matching
+            const pathOnly = entry.path.split('?')[0];
+
+            const match = pathOnly.match(regex);
+            if (match) {
+              selectedEndpoint = {
+                path: pathTemplate,
+                method: entry.method as HttpMethod,
+                operation: operation as any
+              };
+
+              // Extract path parameters
+              paramNames.forEach((name, index) => {
+                pathParams[name] = match[index + 1];
+              });
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    // Parse query params from history entry
     const queryParams: Record<string, string> = {};
-
-    // Extract query params from path
-    url.searchParams.forEach((value, key) => {
-      queryParams[key] = value;
-    });
-
-    // TODO: Extract path params - for now we'll just use the path as-is
-    // This is a limitation - we'd need to match against the OpenAPI spec
-    // to properly extract path params
+    try {
+      // Use entry.path (which includes query params) or entry.request.path if available
+      const fullPath = entry.request.path || entry.path;
+      const url = new URL(fullPath, 'http://dummy.com');
+      url.searchParams.forEach((value, key) => {
+        queryParams[key] = value;
+      });
+    } catch (e) {
+      console.warn('Failed to parse query params from history entry path', e);
+    }
 
     set({
       selectedService: entry.service,
+      selectedEndpoint,
       requestForm: {
         pathParams,
         queryParams,
@@ -127,12 +169,14 @@ export const useAppStore = create<AppState>((set) => ({
         body: entry.request.body ? JSON.stringify(entry.request.body, null, 2) : '',
       },
       lastResponse: entry.response,
+      error: null,
     });
-
-    // Note: We don't set selectedEndpoint here because we'd need to
-    // find it from the spec, which requires async logic
-    // This can be enhanced in a hook
   },
+
+  removeFromHistory: (id) =>
+    set((state) => ({
+      history: state.history.filter((item) => item.id !== id),
+    })),
 
   clearHistory: () => set({ history: [] }),
 }));
