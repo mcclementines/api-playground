@@ -1,4 +1,5 @@
 import Editor from '@monaco-editor/react';
+import { useTheme } from '../../hooks/useTheme';
 
 interface BodyEditorProps {
   value: string;
@@ -6,10 +7,12 @@ interface BodyEditorProps {
 }
 
 export function BodyEditor({ value, onChange }: BodyEditorProps) {
+  const { resolvedTheme } = useTheme();
+
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-gray-700">Request Body</h3>
-      <div className="border border-gray-300 rounded-md overflow-hidden">
+      <h3 className="text-sm font-semibold text-foreground">Request Body</h3>
+      <div className="border border-border rounded-md overflow-hidden">
         <Editor
           height="200px"
           defaultLanguage="json"
@@ -25,10 +28,10 @@ export function BodyEditor({ value, onChange }: BodyEditorProps) {
             automaticLayout: true,
             tabSize: 2,
           }}
-          theme="vs-light"
+          theme={resolvedTheme === 'dark' ? 'vs-dark' : 'vs-light'}
         />
       </div>
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted-foreground">
         Enter valid JSON for the request body
       </p>
     </div>

@@ -2,6 +2,7 @@ import type { OpenAPISpec, OperationObject } from '../../types/openapi';
 import type { HttpMethod } from '../../types/request';
 import { useAppStore } from '../../stores/app-store';
 import { cn } from '../../lib/utils';
+import { HTTP_METHOD_BADGE_STYLES } from '../../lib/http-ui';
 
 interface EndpointListProps {
   spec: OpenAPISpec;
@@ -13,16 +14,6 @@ interface EndpointItem {
   operation: OperationObject;
   summary?: string;
 }
-
-const METHOD_STYLES: Record<HttpMethod, string> = {
-  GET: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900',
-  POST: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-900',
-  PUT: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-900',
-  PATCH: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-900',
-  DELETE: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900',
-  HEAD: 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-800',
-  OPTIONS: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-900',
-};
 
 export function EndpointList({ spec }: EndpointListProps) {
   const { selectedEndpoint, selectEndpoint } = useAppStore();
@@ -80,7 +71,7 @@ export function EndpointList({ spec }: EndpointListProps) {
               <span
                 className={cn(
                   "px-1.5 py-0.5 text-[10px] uppercase font-bold rounded-md border",
-                  METHOD_STYLES[endpoint.method]
+                  HTTP_METHOD_BADGE_STYLES[endpoint.method]
                 )}
               >
                 {endpoint.method}

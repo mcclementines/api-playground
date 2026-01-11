@@ -32,21 +32,21 @@ export function PayloadPreview({ service, method, path, formState }: PayloadPrev
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-gray-700">Request Preview</h3>
-      <div className="border border-gray-300 rounded-md p-3 bg-gray-50 font-mono text-xs space-y-2">
+      <h3 className="text-sm font-semibold text-foreground">Request Preview</h3>
+      <div className="border border-border rounded-md p-3 bg-muted/30 font-mono text-xs space-y-2">
         {/* Request Line */}
         <div>
-          <span className="font-semibold text-blue-700">{requestDetails.method}</span>{' '}
-          <span className="text-gray-700">{requestDetails.url}</span>
+          <span className="font-semibold text-primary">{requestDetails.method}</span>{' '}
+          <span className="text-foreground">{requestDetails.url}</span>
         </div>
 
         {/* Headers */}
         {Object.keys(requestDetails.headers).length > 0 && (
-          <div className="pt-2 border-t border-gray-300">
-            <div className="text-gray-500 mb-1">Headers:</div>
+          <div className="pt-2 border-t border-border">
+            <div className="text-muted-foreground mb-1">Headers:</div>
             {Object.entries(requestDetails.headers).map(([key, value]) => (
-              <div key={key} className="text-gray-700">
-                <span className="text-purple-700">{key}:</span> {value}
+              <div key={key} className="text-foreground">
+                <span className="text-muted-foreground">{key}:</span> {value}
               </div>
             ))}
           </div>
@@ -54,15 +54,15 @@ export function PayloadPreview({ service, method, path, formState }: PayloadPrev
 
         {/* Body */}
         {requestDetails.body && (
-          <div className="pt-2 border-t border-gray-300">
-            <div className="text-gray-500 mb-1">Body:</div>
-            <pre className="text-gray-700 whitespace-pre-wrap">
+          <div className="pt-2 border-t border-border">
+            <div className="text-muted-foreground mb-1">Body:</div>
+            <pre className="text-foreground whitespace-pre-wrap">
               {JSON.stringify(requestDetails.body, null, 2)}
             </pre>
           </div>
         )}
       </div>
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted-foreground">
         This request will be sent to the {spec?.info?.title || service} API
       </p>
     </div>

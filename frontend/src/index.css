@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  /* Corporate Royal Blue Scale - Professional, Trustworthy, Secure */
   --color-brand-50: #eff6ff;
   --color-brand-100: #dbeafe;
   --color-brand-200: #bfdbfe;
@@ -32,62 +33,97 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Subtle, professional shadows */
+  --shadow-glass: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-glass-dark: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }
 
 @layer base {
-
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    /* Clean Professional Light Mode */
+    --background: hsl(210 40% 98%);
+    /* Cool white/grey */
+    --foreground: hsl(222 47% 11%);
+    /* Deep Navy Text */
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(222 47% 11%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(222 47% 11%);
+    --primary: hsl(221 83% 53%);
+    /* Standard Royal Blue */
+    --primary-foreground: hsl(210 40% 98%);
+    --secondary: hsl(210 40% 96.1%);
+    --secondary-foreground: hsl(222 47% 11%);
+    --muted: hsl(210 40% 96.1%);
+    --muted-foreground: hsl(215 16% 47%);
+    --accent: hsl(210 40% 96.1%);
+    --accent-foreground: hsl(222 47% 11%);
+    --destructive: hsl(0 84.2% 60.2%);
+    --destructive-foreground: hsl(210 40% 98%);
+    --border: hsl(214.3 31.8% 91.4%);
+    --input: hsl(214.3 31.8% 91.4%);
+    --ring: hsl(221 83% 53%);
     --radius: 0.5rem;
+    /* Sharper radius for professional look */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    /* Sleek Corporate Dark Mode - Gunmetal/Slate */
+    --background: hsl(222 47% 11%);
+    /* Deep Navy/Slate Background */
+    --foreground: hsl(210 40% 98%);
+    --card: hsl(217 33% 17%);
+    /* Slightly lighter slate */
+    --card-foreground: hsl(210 40% 98%);
+    --popover: hsl(217 33% 17%);
+    --popover-foreground: hsl(210 40% 98%);
+    --primary: hsl(217 91% 60%);
+    /* Bright Blue for dark mode visibility */
+    --primary-foreground: hsl(222 47% 11%);
+    --secondary: hsl(217 33% 17%);
+    --secondary-foreground: hsl(210 40% 98%);
+    --muted: hsl(217 33% 17%);
+    --muted-foreground: hsl(215 20% 65%);
+    --accent: hsl(217 33% 17%);
+    --accent-foreground: hsl(210 40% 98%);
+    --destructive: hsl(0 62.8% 30.6%);
+    --destructive-foreground: hsl(210 40% 98%);
+    --border: hsl(215 25% 27%);
+    --input: hsl(215 25% 27%);
+    --ring: hsl(224 76% 48%);
   }
 
   body {
-    @apply bg-background text-foreground tracking-tight antialiased selection:bg-brand-500/20 selection:text-brand-200;
+    @apply bg-background text-foreground tracking-normal antialiased selection:bg-primary/20 selection:text-foreground;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/5 backdrop-blur-lg border border-white/10;
+    @apply bg-card/70 dark:bg-card/50 border border-border/50;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .glass-card {
+    @apply bg-card border border-border shadow-sm;
+    /* High opacity for clear visibility, subtle effect only */
+  }
+
+  /* Very subtle professional gradient, barely visible, just adds depth */
+  .bg-gradient-mesh {
+    background-image:
+      radial-gradient(at 0% 0%, hsla(210, 100%, 98%, 1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(220, 100%, 98%, 1) 0px, transparent 50%);
+  }
+
+  .dark .bg-gradient-mesh {
+    background-image:
+      radial-gradient(at 0% 0%, hsla(222, 47%, 13%, 1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(222, 47%, 13%, 1) 0px, transparent 50%);
   }
 }
