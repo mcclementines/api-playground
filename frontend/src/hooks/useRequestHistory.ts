@@ -23,9 +23,14 @@ export function useRequestHistory() {
 
   // Save history to localStorage whenever it changes
   useEffect(() => {
-    if (hasLoadedRef.current && history.length > 0) {
-      saveHistory(history);
+    if (!hasLoadedRef.current) return;
+
+    if (history.length === 0) {
+      clearStoredHistory();
+      return;
     }
+
+    saveHistory(history);
   }, [history]);
 
   const clearAll = () => {

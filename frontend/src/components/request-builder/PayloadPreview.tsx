@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
 import { buildProxyRequest } from '../../lib/request-builder';
-import type { RequestFormState } from '../../types/request';
+import type { HttpMethod, RequestFormState } from '../../types/request';
 import type { OpenAPISpecWithProxy } from '../../types/openapi';
 import { useAppStore } from '../../stores/app-store';
 
 interface PayloadPreviewProps {
   service: string;
-  method: string;
+  method: HttpMethod;
   path: string;
   formState: RequestFormState;
 }
@@ -22,10 +22,12 @@ export function PayloadPreview({ service, method, path, formState }: PayloadPrev
     const baseURL = spec?.['x-proxy-config']?.baseURL || 'unknown';
     const fullURL = `${baseURL}${proxyRequest.path}`;
 
+    const headers: Record<string, string> = proxyRequest.headers ?? {};
+
     return {
       method: proxyRequest.method,
       url: fullURL,
-      headers: proxyRequest.headers || {},
+      headers,
       body: proxyRequest.body,
     };
   }, [service, method, path, formState, spec]);
@@ -53,7 +55,7 @@ export function PayloadPreview({ service, method, path, formState }: PayloadPrev
         )}
 
         {/* Body */}
-        {requestDetails.body && (
+        {requestDetails.body !== undefined && requestDetails.body !== null && (
           <div className="pt-2 border-t border-border">
             <div className="text-muted-foreground mb-1">Body:</div>
             <pre className="text-foreground whitespace-pre-wrap">

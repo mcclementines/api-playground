@@ -17,6 +17,7 @@ export function RequestBuilder() {
     selectedEndpoint,
     requestForm,
     updateRequestForm,
+    specs,
   } = useAppStore();
 
   // Initialize form when endpoint changes - but ONLY if it's currently empty
@@ -34,7 +35,7 @@ export function RequestBuilder() {
         updateRequestForm({ pathParams: initialPathParams });
       }
     }
-  }, [selectedEndpoint?.path, selectedEndpoint?.method]);
+  }, [selectedEndpoint, requestForm.pathParams, updateRequestForm]);
 
   if (!selectedService || !selectedEndpoint) {
     return null;
@@ -59,10 +60,9 @@ export function RequestBuilder() {
     }
   }
 
-  const { specs } = useAppStore();
-  const spec = specs[selectedService] as any;
-  const baseURL = spec?.['x-proxy-config']?.baseURL || '';
-  const apiTitle = spec?.info?.title || selectedService;
+  const spec = specs[selectedService];
+  const baseURL = spec?.['x-proxy-config']?.baseURL ?? '';
+  const apiTitle = spec?.info?.title ?? selectedService;
 
   return (
     <div className="space-y-8 pb-10">

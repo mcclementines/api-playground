@@ -1,11 +1,11 @@
 import { create } from 'zustand';
-import type { OpenAPISpec, EndpointSelection } from '../types/openapi';
-import type { RequestFormState, RequestHistoryEntry, ProxyResponse, HttpMethod } from '../types/request';
+import type { EndpointSelection, OpenAPISpecWithProxy, OperationObject, PathItemObject } from '../types/openapi';
+import type { RequestFormState, RequestHistoryEntry, ProxyResponse } from '../types/request';
 
 interface AppState {
   // Services & Specs
   services: string[];
-  specs: Record<string, OpenAPISpec>;
+  specs: Record<string, OpenAPISpecWithProxy>;
   selectedService: string | null;
   selectedEndpoint: EndpointSelection | null;
 
@@ -22,7 +22,7 @@ interface AppState {
 
   // Actions
   setServices: (services: string[]) => void;
-  setSpec: (service: string, spec: OpenAPISpec) => void;
+  setSpec: (service: string, spec: OpenAPISpecWithProxy) => void;
   selectService: (service: string | null) => void;
   selectEndpoint: (endpoint: EndpointSelection | null) => void;
   updateRequestForm: (form: Partial<RequestFormState>) => void;
@@ -109,40 +109,52 @@ export const useAppStore = create<AppState>((set) => ({
     let selectedEndpoint: EndpointSelection | null = null;
     const pathParams: Record<string, string> = {};
 
-    if (spec && spec.paths) {
+    if (spec?.paths) {
+      const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
       // Find matching endpoint
-      for (const [pathTemplate, operations] of Object.entries(spec.paths)) {
-        if (operations && typeof operations === 'object') {
-          const operation = (operations as any)[entry.method.toLowerCase()];
-          if (operation) {
-            // Create regex for matching and parameter extraction
-            // e.g., /posts/{id} -> /posts/([^/]+)
-            const paramNames: string[] = [];
-            const normalizedTemplate = pathTemplate.replace(/\{([^}]+)\}/g, (_, paramName) => {
-              paramNames.push(paramName);
-              return '([^/]+)';
-            });
-            const regex = new RegExp(`^${normalizedTemplate}$`);
+      for (const [pathTemplate, pathItemOrRef] of Object.entries(spec.paths)) {
+        if (!pathItemOrRef || typeof pathItemOrRef !== 'object') continue;
+        if ('$ref' in pathItemOrRef) continue;
 
-            // The entry.path might have query params, strip them for matching
-            const pathOnly = entry.path.split('?')[0];
+        const pathItem = pathItemOrRef as PathItemObject;
+        const methodKey = entry.method.toLowerCase() as keyof PathItemObject;
+        const opOrRef = pathItem[methodKey];
 
-            const match = pathOnly.match(regex);
-            if (match) {
-              selectedEndpoint = {
-                path: pathTemplate,
-                method: entry.method as HttpMethod,
-                operation: operation as any
-              };
+        if (!opOrRef || typeof opOrRef !== 'object') continue;
+        if ('$ref' in opOrRef) continue;
 
-              // Extract path parameters
-              paramNames.forEach((name, index) => {
-                pathParams[name] = match[index + 1];
-              });
-              break;
-            }
-          }
-        }
+        const operation = opOrRef as OperationObject;
+
+        // Create regex for matching and parameter extraction
+        // e.g., /posts/{id} -> /posts/([^/]+)
+        const paramNames: string[] = [];
+        const tokenized = pathTemplate.replace(/\{([^}]+)\}/g, (_, paramName: string) => {
+          paramNames.push(paramName);
+          return `__PARAM_${paramNames.length - 1}__`;
+        });
+
+        const normalizedTemplate = escapeRegex(tokenized).replace(/__PARAM_(\d+)__/g, '([^/]+)');
+        const regex = new RegExp(`^${normalizedTemplate}$`);
+
+        // The entry.path might have query params, strip them for matching
+        const pathOnly = entry.path.split('?')[0];
+
+        const match = pathOnly.match(regex);
+        if (!match) continue;
+
+        selectedEndpoint = {
+          path: pathTemplate,
+          method: entry.method,
+          operation,
+        };
+
+        // Extract path parameters
+        paramNames.forEach((name, index) => {
+          pathParams[name] = match[index + 1];
+        });
+
+        break;
       }
     }
 

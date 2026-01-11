@@ -15,9 +15,9 @@ interface BodySchemaFormProps {
 }
 
 export function BodySchemaForm({ schema, value, onChange }: BodySchemaFormProps) {
-  const [formData, setFormData] = useState<any>(() => {
+  const [formData, setFormData] = useState<unknown>(() => {
     try {
-      return value ? JSON.parse(value) : buildDefaultFromSchema(schema);
+      return value ? (JSON.parse(value) as unknown) : buildDefaultFromSchema(schema);
     } catch (error) {
       console.error('Error parsing initial value:', error);
       return buildDefaultFromSchema(schema);
@@ -38,11 +38,10 @@ export function BodySchemaForm({ schema, value, onChange }: BodySchemaFormProps)
   useEffect(() => {
     const jsonString = JSON.stringify(formData, null, 2);
     onChange(jsonString);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData]); // Only re-run when formData changes, not when onChange changes
+  }, [formData, onChange]);
 
-  const handleFieldChange = (path: string, newValue: any, fieldSchema: SchemaObject) => {
-    let processedValue = newValue;
+  const handleFieldChange = (path: string, newValue: unknown, fieldSchema: SchemaObject) => {
+    let processedValue: unknown = newValue;
 
     // Convert to appropriate type
     if (fieldSchema.type === 'number' || fieldSchema.type === 'integer') {
@@ -51,7 +50,7 @@ export function BodySchemaForm({ schema, value, onChange }: BodySchemaFormProps)
       processedValue = newValue === 'true';
     }
 
-    setFormData((prev: any) => setValueByPath(prev, path, processedValue));
+    setFormData((prev: unknown) => setValueByPath(prev, path, processedValue));
   };
 
   // Safeguard: If there's any error state, fallback to simple message
@@ -115,7 +114,7 @@ export function BodySchemaForm({ schema, value, onChange }: BodySchemaFormProps)
                 {field.schema.enum ? (
                   <select
                     id={`body-${field.path}`}
-                    value={currentValue || ''}
+                    value={currentValue === undefined || currentValue === null ? '' : String(currentValue)}
                     onChange={(e) => handleFieldChange(field.path, e.target.value, field.schema)}
                     className="w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 bg-card text-foreground"
                   >
@@ -161,7 +160,13 @@ export function BodySchemaForm({ schema, value, onChange }: BodySchemaFormProps)
                         ? 'number'
                         : 'text'
                     }
-                    value={currentValue ?? ''}
+                    value={
+                      typeof currentValue === 'string' || typeof currentValue === 'number'
+                        ? currentValue
+                        : currentValue === undefined || currentValue === null
+                          ? ''
+                          : String(currentValue)
+                    }
                     onChange={(e) => handleFieldChange(field.path, e.target.value, field.schema)}
                     placeholder={field.schema.description || `Enter ${field.label}`}
                     className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 bg-card text-foreground ${

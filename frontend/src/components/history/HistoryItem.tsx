@@ -2,7 +2,6 @@ import type { RequestHistoryEntry } from '../../types/request';
 import { cn } from '../../lib/utils';
 import { ArrowLeftCircle, Trash2, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
-import type { HttpMethod } from '../../types/request';
 import { HTTP_METHOD_BADGE_STYLES, getHttpStatusTextStyles } from '../../lib/http-ui';
 
 interface HistoryItemProps {
@@ -15,8 +14,7 @@ export function HistoryItem({ entry, onReplay, onDelete }: HistoryItemProps) {
   const [copied, setCopied] = useState(false);
 
   const methodStyles =
-    HTTP_METHOD_BADGE_STYLES[entry.method as HttpMethod] ||
-    'bg-muted/40 text-muted-foreground border-border';
+    HTTP_METHOD_BADGE_STYLES[entry.method] || 'bg-muted/40 text-muted-foreground border-border';
 
   const formatTime = (timestamp: number): string => {
     const date = new Date(timestamp);
@@ -34,11 +32,16 @@ export function HistoryItem({ entry, onReplay, onDelete }: HistoryItemProps) {
     return date.toLocaleDateString();
   };
 
-  const handleCopy = (e: React.MouseEvent) => {
+  const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(entry.path);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+
+    try {
+      await navigator.clipboard?.writeText(entry.path);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Ignore clipboard failures (permissions / insecure context)
+    }
   };
 
   const handleDelete = (e: React.MouseEvent) => {
