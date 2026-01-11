@@ -77,12 +77,12 @@ export function RequestHistory({ isOpen, onClose }: RequestHistoryProps) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/10 dark:bg-black/40 backdrop-blur-sm z-50 transition-opacity animate-in fade-in duration-300"
+        className="fixed inset-0 bg-black/5 dark:bg-black/40 backdrop-blur-sm z-50 transition-opacity animate-in fade-in duration-300"
         onClick={onClose}
       />
 
       {/* Slide-out Panel */}
-      <div className="fixed right-4 top-4 bottom-4 w-[26rem] bg-card/70 dark:bg-card/50 backdrop-blur-3xl border border-border/50 shadow-2xl z-50 flex flex-col rounded-[2.5rem] overflow-hidden animate-in slide-in-from-right-8 duration-500 ease-out" style={{ WebkitBackdropFilter: 'blur(64px)' }}>
+      <div className="fixed right-4 top-4 bottom-4 w-[26rem] glass-card shadow-2xl z-50 flex flex-col rounded-[2.5rem] overflow-hidden animate-in slide-in-from-right-8 duration-500 ease-out">
         {/* Header */}
         <div className="p-8 pb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
