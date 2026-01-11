@@ -1,14 +1,16 @@
 import Editor from '@monaco-editor/react';
+import { useTheme } from '../../hooks/useTheme';
 
 interface RawJsonViewProps {
-  data: any;
+  data: unknown;
 }
 
 export function RawJsonView({ data }: RawJsonViewProps) {
+  const { resolvedTheme } = useTheme();
   const jsonString = JSON.stringify(data, null, 2);
 
   return (
-    <div className="border border-gray-300 rounded-md overflow-hidden">
+    <div className="border border-border rounded-md overflow-hidden">
       <Editor
         height="400px"
         defaultLanguage="json"
@@ -24,7 +26,7 @@ export function RawJsonView({ data }: RawJsonViewProps) {
           automaticLayout: true,
           tabSize: 2,
         }}
-        theme="vs-light"
+        theme={resolvedTheme === 'dark' ? 'vs-dark' : 'vs-light'}
       />
     </div>
   );

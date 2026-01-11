@@ -47,7 +47,7 @@ export function clearHistory(): void {
 /**
  * Save specs cache to localStorage with timestamp
  */
-export function saveSpecsCache(specs: Record<string, any>): void {
+export function saveSpecsCache(specs: Record<string, unknown>): void {
   try {
     const cache = {
       timestamp: Date.now(),
@@ -62,7 +62,7 @@ export function saveSpecsCache(specs: Record<string, any>): void {
 /**
  * Load specs cache from localStorage (24h TTL)
  */
-export function loadSpecsCache(): Record<string, any> | null {
+export function loadSpecsCache(): Record<string, unknown> | null {
   try {
     const stored = localStorage.getItem(SPECS_CACHE_KEY);
     if (!stored) return null;

@@ -15,7 +15,7 @@ export function ParameterForm({ parameters, values, onChange, label }: Parameter
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-700">{label}</h3>
+      <h3 className="text-sm font-semibold text-foreground">{label}</h3>
       <div className="space-y-3">
         {parameters.map((param) => {
           const value = values[param.name] || '';
@@ -26,7 +26,7 @@ export function ParameterForm({ parameters, values, onChange, label }: Parameter
             <div key={param.name}>
               <label
                 htmlFor={`param-${param.name}`}
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-foreground mb-1"
               >
                 {param.name}
                 {param.required && <span className="text-red-500 ml-1">*</span>}
@@ -38,7 +38,7 @@ export function ParameterForm({ parameters, values, onChange, label }: Parameter
                   id={`param-${param.name}`}
                   value={value}
                   onChange={(e) => onChange(param.name, e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 bg-card text-foreground"
                 >
                   <option value="">Select...</option>
                   {schema.enum.map((option) => (
@@ -53,7 +53,7 @@ export function ParameterForm({ parameters, values, onChange, label }: Parameter
                   id={`param-${param.name}`}
                   value={value}
                   onChange={(e) => onChange(param.name, e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 bg-card text-foreground"
                 >
                   <option value="">Select...</option>
                   <option value="true">true</option>
@@ -67,14 +67,14 @@ export function ParameterForm({ parameters, values, onChange, label }: Parameter
                   value={value}
                   onChange={(e) => onChange(param.name, e.target.value)}
                   placeholder={param.description || `Enter ${param.name}`}
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    error ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 bg-card text-foreground ${
+                    error ? 'border-red-300' : 'border-border'
                   }`}
                 />
               )}
 
               {param.description && !error && (
-                <p className="mt-1 text-xs text-gray-500">{param.description}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{param.description}</p>
               )}
 
               {error && <p className="mt-1 text-xs text-red-600">{error}</p>}

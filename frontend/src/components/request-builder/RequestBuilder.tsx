@@ -9,17 +9,7 @@ import { BodySchemaForm } from './BodySchemaForm';
 import { PayloadPreview } from './PayloadPreview';
 import { Box, ExternalLink } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import type { HttpMethod } from '../../types/request';
-
-const METHOD_BADGES: Record<HttpMethod, string> = {
-  GET: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900',
-  POST: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-900',
-  PUT: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-900',
-  PATCH: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-900',
-  DELETE: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900',
-  HEAD: 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-800',
-  OPTIONS: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-900',
-};
+import { HTTP_METHOD_BADGE_STYLES } from '../../lib/http-ui';
 
 export function RequestBuilder() {
   const {
@@ -27,23 +17,25 @@ export function RequestBuilder() {
     selectedEndpoint,
     requestForm,
     updateRequestForm,
-    resetRequestForm,
+    specs,
   } = useAppStore();
 
-  // Reset form when endpoint changes
+  // Initialize form when endpoint changes - but ONLY if it's currently empty
   useEffect(() => {
     if (selectedEndpoint) {
-      resetRequestForm();
-
-      // Initialize path params with empty values
+      // Only initialize if we don't have path params yet
       const pathParamNames = extractPathParams(selectedEndpoint.path);
-      const initialPathParams: Record<string, string> = {};
-      pathParamNames.forEach((name) => {
-        initialPathParams[name] = '';
-      });
-      updateRequestForm({ pathParams: initialPathParams });
+      const hasPathParams = Object.keys(requestForm.pathParams).length > 0;
+
+      if (!hasPathParams && pathParamNames.length > 0) {
+        const initialPathParams: Record<string, string> = {};
+        pathParamNames.forEach((name) => {
+          initialPathParams[name] = '';
+        });
+        updateRequestForm({ pathParams: initialPathParams });
+      }
     }
-  }, [selectedEndpoint?.path, selectedEndpoint?.method]);
+  }, [selectedEndpoint, requestForm.pathParams, updateRequestForm]);
 
   if (!selectedService || !selectedEndpoint) {
     return null;
@@ -68,17 +60,16 @@ export function RequestBuilder() {
     }
   }
 
-  const { specs } = useAppStore();
-  const spec = specs[selectedService] as any;
-  const baseURL = spec?.['x-proxy-config']?.baseURL || '';
-  const apiTitle = spec?.info?.title || selectedService;
+  const spec = specs[selectedService];
+  const baseURL = spec?.['x-proxy-config']?.baseURL ?? '';
+  const apiTitle = spec?.info?.title ?? selectedService;
 
   return (
     <div className="space-y-8 pb-10">
       {/* API Info Banner */}
       <div className="bg-card border border-border rounded-lg p-4 shadow-sm flex items-start gap-3">
-        <div className="p-2 bg-brand-500/10 rounded-full mt-0.5">
-          <Box className="w-4 h-4 text-brand-500" />
+        <div className="p-2 bg-primary/10 rounded-full mt-0.5">
+          <Box className="w-4 h-4 text-primary" />
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
@@ -88,7 +79,7 @@ export function RequestBuilder() {
                 href={baseURL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-brand-500 transition-colors"
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
               >
                 {baseURL}
                 <ExternalLink className="w-3 h-3" />
@@ -107,7 +98,7 @@ export function RequestBuilder() {
           <span
             className={cn(
               "px-3 py-1 text-sm font-bold rounded-md border shadow-sm",
-              METHOD_BADGES[selectedEndpoint.method]
+              HTTP_METHOD_BADGE_STYLES[selectedEndpoint.method]
             )}
           >
             {selectedEndpoint.method}

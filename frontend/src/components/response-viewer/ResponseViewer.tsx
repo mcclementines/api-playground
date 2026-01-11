@@ -4,6 +4,7 @@ import { PrettyDisplay } from './PrettyDisplay';
 import { RawJsonView } from './RawJsonView';
 import { Eye, Code, ArrowUpRight, Copy, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { getHttpStatusBadgeStyles } from '../../lib/http-ui';
 
 interface ResponseViewerProps {
   response: ProxyResponse;
@@ -13,14 +14,6 @@ export function ResponseViewer({ response }: ResponseViewerProps) {
   const [viewMode, setViewMode] = useState<'pretty' | 'raw'>('pretty');
   const [showHeaders, setShowHeaders] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  // Determine status color
-  const getStatusColor = (status: number): string => {
-    if (status >= 200 && status < 300) return 'bg-green-500/15 text-green-600 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-900';
-    if (status >= 300 && status < 400) return 'bg-blue-500/15 text-blue-600 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-900';
-    if (status >= 400 && status < 500) return 'bg-orange-500/15 text-orange-600 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-900';
-    return 'bg-red-500/15 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-900';
-  };
 
   const statusText = response.statusCode >= 200 && response.statusCode < 300 ? 'Success' : 'Error';
 
@@ -38,7 +31,7 @@ export function ResponseViewer({ response }: ResponseViewerProps) {
           <div
             className={cn(
               "px-3 py-1.5 rounded-md border font-bold text-sm flex items-center gap-2",
-              getStatusColor(response.statusCode)
+              getHttpStatusBadgeStyles(response.statusCode)
             )}
           >
             <span className="text-lg leading-none mb-0.5">●</span>
@@ -95,7 +88,7 @@ export function ResponseViewer({ response }: ResponseViewerProps) {
             className={cn(
               "px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2",
               viewMode === 'pretty'
-                ? "border-brand-500 text-brand-500"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
             )}
           >
@@ -107,7 +100,7 @@ export function ResponseViewer({ response }: ResponseViewerProps) {
             className={cn(
               "px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2",
               viewMode === 'raw'
-                ? "border-brand-500 text-brand-500"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
             )}
           >

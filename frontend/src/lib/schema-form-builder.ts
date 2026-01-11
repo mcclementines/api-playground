@@ -3,18 +3,19 @@ import type { SchemaObject } from '../types/openapi';
 /**
  * Build a default object from a schema
  */
-export function buildDefaultFromSchema(schema: SchemaObject | null | undefined): any {
+export function buildDefaultFromSchema(schema: SchemaObject | null | undefined): unknown {
   if (!schema || !schema.type) return {};
 
   switch (schema.type) {
-    case 'object':
-      const obj: Record<string, any> = {};
+    case 'object': {
+      const obj: Record<string, unknown> = {};
       if (schema.properties) {
         Object.entries(schema.properties).forEach(([key, propSchema]) => {
           obj[key] = buildDefaultFromSchema(propSchema as SchemaObject);
         });
       }
       return obj;
+    }
 
     case 'array':
       return [];
@@ -87,43 +88,45 @@ export function getSchemaFields(
 /**
  * Set a value in an object using dot notation path
  */
-export function setValueByPath(obj: any, path: string, value: any): any {
+export function setValueByPath(obj: unknown, path: string, value: unknown): unknown {
   const keys = path.split('.');
-  const result = { ...obj };
-  let current = result;
+  const base: Record<string, unknown> =
+    obj && typeof obj === 'object' ? { ...(obj as Record<string, unknown>) } : {};
+
+  let current: Record<string, unknown> = base;
 
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
-    if (!current[key] || typeof current[key] !== 'object') {
+    const next = current[key];
+
+    if (!next || typeof next !== 'object' || Array.isArray(next)) {
       current[key] = {};
     }
-    current = current[key];
+
+    current = current[key] as Record<string, unknown>;
   }
 
   const lastKey = keys[keys.length - 1];
 
-  // Convert value based on type
   if (value === '') {
-    delete current[lastKey]; // Remove empty values
+    delete current[lastKey];
   } else {
     current[lastKey] = value;
   }
 
-  return result;
+  return base;
 }
 
 /**
  * Get a value from an object using dot notation path
  */
-export function getValueByPath(obj: any, path: string): any {
+export function getValueByPath(obj: unknown, path: string): unknown {
   const keys = path.split('.');
-  let current = obj;
+  let current: unknown = obj;
 
   for (const key of keys) {
-    if (current === null || current === undefined) {
-      return undefined;
-    }
-    current = current[key];
+    if (!current || typeof current !== 'object') return undefined;
+    current = (current as Record<string, unknown>)[key];
   }
 
   return current;
@@ -132,7 +135,7 @@ export function getValueByPath(obj: any, path: string): any {
 /**
  * Validate a value against a schema
  */
-export function validateSchemaValue(schema: SchemaObject, value: any): string | null {
+export function validateSchemaValue(schema: SchemaObject, value: unknown): string | null {
   if (schema.required && (value === undefined || value === '' || value === null)) {
     return 'This field is required';
   }
@@ -162,6 +165,10 @@ export function validateSchemaValue(schema: SchemaObject, value: any): string | 
   }
 
   if (schema.type === 'string') {
+    if (typeof value !== 'string') {
+      return 'Must be a string';
+    }
+
     if (schema.minLength !== undefined && value.length < schema.minLength) {
       return `Minimum length is ${schema.minLength}`;
     }
