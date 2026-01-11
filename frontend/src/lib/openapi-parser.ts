@@ -21,21 +21,26 @@ export function parseParameters(operation: OperationObject): ParsedParameters {
 /**
  * Extract request body schema from operation
  */
-export function parseRequestBodySchema(
-  operation: OperationObject
-): SchemaObject | null {
-  if (!operation.requestBody) return null;
+export function parseRequestBodySchema(operation: OperationObject): SchemaObject | null {
+  const requestBody = operation.requestBody;
+  if (!requestBody || typeof requestBody !== 'object') return null;
 
-  const requestBody = operation.requestBody as any;
+  // OpenAPI allows requestBody to be a $ref; we don't resolve refs here.
+  if ('$ref' in requestBody) return null;
+
   const content = requestBody.content?.['application/json'];
+  const schema = content?.schema;
 
-  return content?.schema || null;
+  if (!schema || typeof schema !== 'object') return null;
+  if ('$ref' in schema) return null;
+
+  return schema;
 }
 
 /**
  * Generate default value based on schema type
  */
-export function generateDefaultValue(schema: SchemaObject): any {
+export function generateDefaultValue(schema: SchemaObject): unknown {
   if (schema.default !== undefined) {
     return schema.default;
   }
@@ -62,7 +67,7 @@ export function generateDefaultValue(schema: SchemaObject): any {
  */
 export function validateParameter(
   param: ParameterObject,
-  value: any
+  value: unknown
 ): string | null {
   if (param.required && (value === undefined || value === '')) {
     return `${param.name} is required`;
@@ -95,7 +100,7 @@ export function validateParameter(
       }
     }
 
-    if (schema.enum && !schema.enum.includes(value)) {
+    if (schema.enum && !schema.enum.some((option) => option === value)) {
       return `${param.name} must be one of: ${schema.enum.join(', ')}`;
     }
   }

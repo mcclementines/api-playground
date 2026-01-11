@@ -1,11 +1,11 @@
-import type { ProxyRequest, RequestFormState } from '../types/request';
+import type { HttpMethod, ProxyRequest, RequestFormState } from '../types/request';
 
 /**
  * Build a ProxyRequest from form state and endpoint details
  */
 export function buildProxyRequest(
   service: string,
-  method: string,
+  method: HttpMethod,
   path: string,
   formState: RequestFormState
 ): ProxyRequest {
@@ -31,7 +31,7 @@ export function buildProxyRequest(
   // Build request object
   const request: ProxyRequest = {
     service,
-    method: method as any,
+    method,
     path: finalPath,
   };
 
@@ -51,7 +51,7 @@ export function buildProxyRequest(
   if (formState.body && formState.body.trim() !== '') {
     try {
       request.body = JSON.parse(formState.body);
-    } catch (error) {
+    } catch {
       // If body is not valid JSON, include as string
       request.body = formState.body;
     }

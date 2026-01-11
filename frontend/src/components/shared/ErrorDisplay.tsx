@@ -5,11 +5,11 @@ interface ErrorDisplayProps {
 
 export function ErrorDisplay({ message, onRetry }: ErrorDisplayProps) {
   return (
-    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+    <div className="bg-red-50 border border-red-200 dark:bg-red-950/40 dark:border-red-900/60 rounded-lg p-4">
       <div className="flex items-start">
         <div className="flex-shrink-0">
           <svg
-            className="h-5 w-5 text-red-400"
+            className="h-5 w-5 text-red-500 dark:text-red-300"
             viewBox="0 0 20 20"
             fill="currentColor"
           >
@@ -21,13 +21,13 @@ export function ErrorDisplay({ message, onRetry }: ErrorDisplayProps) {
           </svg>
         </div>
         <div className="ml-3 flex-1">
-          <h3 className="text-sm font-medium text-red-800">Error</h3>
-          <div className="mt-2 text-sm text-red-700">{message}</div>
+          <h3 className="text-sm font-medium text-red-900 dark:text-red-200">Error</h3>
+          <div className="mt-2 text-sm text-red-800/90 dark:text-red-200/90">{message}</div>
           {onRetry && (
             <div className="mt-4">
               <button
                 onClick={onRetry}
-                className="text-sm font-medium text-red-600 hover:text-red-500"
+                className="text-sm font-medium text-red-700 hover:text-red-600 dark:text-red-300 dark:hover:text-red-200"
               >
                 Try again
               </button>

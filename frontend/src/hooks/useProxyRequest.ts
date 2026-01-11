@@ -34,7 +34,7 @@ export function useProxyRequest() {
     if (requestForm.body && requestForm.body.trim() !== '') {
       try {
         JSON.parse(requestForm.body);
-      } catch (error) {
+      } catch {
         setError('Invalid JSON in request body');
         return false;
       }

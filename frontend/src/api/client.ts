@@ -1,4 +1,4 @@
-import type { OpenAPISpec } from '../types/openapi';
+import type { OpenAPISpecWithProxy } from '../types/openapi';
 import type { ProxyRequest, ProxyResponse } from '../types/request';
 import { ApiError, type ApiClient, type ApiConfig } from './types';
 
@@ -41,7 +41,7 @@ class ApiClientImpl implements ApiClient {
    * Fetch OpenAPI specification for a service
    * GET /api/specs/{service}
    */
-  async getSpec(service: string): Promise<OpenAPISpec> {
+  async getSpec(service: string): Promise<OpenAPISpecWithProxy> {
     try {
       const response = await fetch(
         `${this.config.baseURL}/api/specs/${encodeURIComponent(service)}`
@@ -70,7 +70,7 @@ class ApiClientImpl implements ApiClient {
    * Send a proxy request to a backend service
    * POST /api/proxy
    */
-  async proxyRequest<T = any>(request: ProxyRequest): Promise<ProxyResponse<T>> {
+  async proxyRequest<T = unknown>(request: ProxyRequest): Promise<ProxyResponse<T>> {
     try {
       const response = await fetch(`${this.config.baseURL}/api/proxy`, {
         method: 'POST',

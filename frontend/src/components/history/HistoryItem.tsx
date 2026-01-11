@@ -1,27 +1,20 @@
 import type { RequestHistoryEntry } from '../../types/request';
 import { cn } from '../../lib/utils';
-import { ArrowLeftCircle } from 'lucide-react';
+import { ArrowLeftCircle, Trash2, Copy, Check } from 'lucide-react';
+import { useState } from 'react';
+import { HTTP_METHOD_BADGE_STYLES, getHttpStatusTextStyles } from '../../lib/http-ui';
 
 interface HistoryItemProps {
   entry: RequestHistoryEntry;
   onReplay: (entry: RequestHistoryEntry) => void;
+  onDelete: (id: string) => void;
 }
 
-const METHOD_STYLES: Record<string, string> = {
-  GET: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900',
-  POST: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-900',
-  PUT: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-900',
-  PATCH: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-900',
-  DELETE: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900',
-};
+export function HistoryItem({ entry, onReplay, onDelete }: HistoryItemProps) {
+  const [copied, setCopied] = useState(false);
 
-export function HistoryItem({ entry, onReplay }: HistoryItemProps) {
-  const getStatusColor = (status: number): string => {
-    if (status >= 200 && status < 300) return 'text-green-600 dark:text-green-400';
-    if (status >= 300 && status < 400) return 'text-blue-600 dark:text-blue-400';
-    if (status >= 400 && status < 500) return 'text-orange-600 dark:text-orange-400';
-    return 'text-red-600 dark:text-red-400';
-  };
+  const methodStyles =
+    HTTP_METHOD_BADGE_STYLES[entry.method] || 'bg-muted/40 text-muted-foreground border-border';
 
   const formatTime = (timestamp: number): string => {
     const date = new Date(timestamp);
@@ -39,17 +32,41 @@ export function HistoryItem({ entry, onReplay }: HistoryItemProps) {
     return date.toLocaleDateString();
   };
 
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    try {
+      await navigator.clipboard?.writeText(entry.path);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Ignore clipboard failures (permissions / insecure context)
+    }
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(entry.id);
+  };
+
   return (
-    <button
+    <div
       onClick={() => onReplay(entry)}
-      className="w-full text-left p-3 hover:bg-muted/50 transition-colors group"
+      className="w-full text-left p-4 hover:bg-muted/40 transition-all group relative cursor-pointer border-b border-border/40 last:border-0 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.5)] active:scale-[0.98]"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onReplay(entry);
+        }
+      }}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-4">
         {/* Method Badge */}
         <span
           className={cn(
-            "px-2 py-0.5 text-[10px] uppercase font-bold rounded-md border flex-shrink-0 mt-0.5",
-            METHOD_STYLES[entry.method] || 'bg-gray-500/10 text-gray-600 border-gray-200'
+            "px-2.5 py-1 text-[9px] uppercase font-black rounded-lg border flex-shrink-0 mt-0.5 tracking-wider shadow-sm transition-transform group-hover:scale-110",
+            methodStyles
           )}
         >
           {entry.method}
@@ -57,27 +74,47 @@ export function HistoryItem({ entry, onReplay }: HistoryItemProps) {
 
         {/* Details */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-foreground truncate">
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <span className="text-xs font-bold text-foreground truncate">
               {entry.service}
             </span>
-            <span className={`text-xs font-bold font-mono ${getStatusColor(entry.status)}`}>
+            <span
+              className={cn(
+                'text-[10px] font-black font-mono px-1.5 py-0.5 rounded-md border shadow-sm',
+                'bg-muted/40 border-border',
+                getHttpStatusTextStyles(entry.status)
+              )}
+            >
               {entry.status}
             </span>
           </div>
-          <div className="text-xs font-mono text-muted-foreground truncate mt-1">
+          <div className="text-[11px] font-mono text-muted-foreground truncate opacity-60 group-hover:opacity-100 transition-opacity">
             {entry.path}
           </div>
-          <div className="flex items-center justify-between mt-1.5">
-            <span className="text-[10px] text-muted-foreground">
+          <div className="flex items-center justify-between mt-3">
+            <span className="text-[10px] font-medium text-muted-foreground opacity-70">
               {formatTime(entry.timestamp)}
             </span>
-            <span className="opacity-0 group-hover:opacity-100 transition-opacity">
-              <ArrowLeftCircle className="w-3.5 h-3.5 text-brand-500" />
-            </span>
+            <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+              <button
+                onClick={handleCopy}
+                className="p-1.5 hover:bg-muted/60 rounded-lg text-muted-foreground hover:text-primary transition-colors shadow-sm"
+                title="Copy path"
+              >
+                {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+              </button>
+              <button
+                onClick={handleDelete}
+                className="p-1.5 hover:bg-red-500/10 rounded-lg text-muted-foreground hover:text-red-500 transition-colors shadow-sm"
+                title="Delete from history"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+              <ArrowLeftCircle className="w-3 h-3 text-primary ml-1 animate-pulse" />
+            </div>
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }

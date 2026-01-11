@@ -7,10 +7,10 @@ export interface ProxyRequest {
   method: HttpMethod;
   path: string;
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
 }
 
-export interface ProxyResponse<T = any> {
+export interface ProxyResponse<T = unknown> {
   statusCode: number;
   headers: Record<string, string[]>;
   body: T;
@@ -29,9 +29,9 @@ export interface RequestHistoryEntry {
   id: string;
   timestamp: number;
   service: string;
-  method: string;
+  method: HttpMethod;
   path: string;
   request: ProxyRequest;
-  response: ProxyResponse;
+  response: ProxyResponse<unknown>;
   status: number; // Quick access to statusCode
 }

@@ -6,7 +6,7 @@ import { loadHistory, saveHistory, clearHistory as clearStoredHistory } from '..
  * Hook to manage request history with localStorage persistence
  */
 export function useRequestHistory() {
-  const { history, clearHistory: clearStoreHistory } = useAppStore();
+  const { history } = useAppStore();
   const hasLoadedRef = useRef(false);
 
   // Load history from localStorage on mount (only once)
@@ -23,18 +23,28 @@ export function useRequestHistory() {
 
   // Save history to localStorage whenever it changes
   useEffect(() => {
-    if (hasLoadedRef.current && history.length > 0) {
-      saveHistory(history);
+    if (!hasLoadedRef.current) return;
+
+    if (history.length === 0) {
+      clearStoredHistory();
+      return;
     }
+
+    saveHistory(history);
   }, [history]);
 
   const clearAll = () => {
-    clearStoreHistory();
+    useAppStore.getState().clearHistory();
     clearStoredHistory();
+  };
+
+  const removeEntry = (id: string) => {
+    useAppStore.getState().removeFromHistory(id);
   };
 
   return {
     history,
     clearAll,
+    removeEntry,
   };
 }

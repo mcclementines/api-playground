@@ -1,11 +1,11 @@
 import { create } from 'zustand';
-import type { OpenAPISpec, EndpointSelection } from '../types/openapi';
+import type { EndpointSelection, OpenAPISpecWithProxy, OperationObject, PathItemObject } from '../types/openapi';
 import type { RequestFormState, RequestHistoryEntry, ProxyResponse } from '../types/request';
 
 interface AppState {
   // Services & Specs
   services: string[];
-  specs: Record<string, OpenAPISpec>;
+  specs: Record<string, OpenAPISpecWithProxy>;
   selectedService: string | null;
   selectedEndpoint: EndpointSelection | null;
 
@@ -22,7 +22,7 @@ interface AppState {
 
   // Actions
   setServices: (services: string[]) => void;
-  setSpec: (service: string, spec: OpenAPISpec) => void;
+  setSpec: (service: string, spec: OpenAPISpecWithProxy) => void;
   selectService: (service: string | null) => void;
   selectEndpoint: (endpoint: EndpointSelection | null) => void;
   updateRequestForm: (form: Partial<RequestFormState>) => void;
@@ -32,6 +32,7 @@ interface AppState {
   setError: (error: string | null) => void;
   addToHistory: (entry: RequestHistoryEntry) => void;
   loadFromHistory: (entry: RequestHistoryEntry) => void;
+  removeFromHistory: (id: string) => void;
   clearHistory: () => void;
 }
 
@@ -102,24 +103,77 @@ export const useAppStore = create<AppState>((set) => ({
       return { history: newHistory };
     }),
 
-  loadFromHistory: (entry) => {
-
-    // Parse request form from history entry
-    const url = new URL(entry.request.path, 'http://dummy.com');
+  loadFromHistory: (entry: RequestHistoryEntry) => {
+    const { specs } = useAppStore.getState();
+    const spec = specs[entry.service];
+    let selectedEndpoint: EndpointSelection | null = null;
     const pathParams: Record<string, string> = {};
+
+    if (spec?.paths) {
+      const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Find matching endpoint
+      for (const [pathTemplate, pathItemOrRef] of Object.entries(spec.paths)) {
+        if (!pathItemOrRef || typeof pathItemOrRef !== 'object') continue;
+        if ('$ref' in pathItemOrRef) continue;
+
+        const pathItem = pathItemOrRef as PathItemObject;
+        const methodKey = entry.method.toLowerCase() as keyof PathItemObject;
+        const opOrRef = pathItem[methodKey];
+
+        if (!opOrRef || typeof opOrRef !== 'object') continue;
+        if ('$ref' in opOrRef) continue;
+
+        const operation = opOrRef as OperationObject;
+
+        // Create regex for matching and parameter extraction
+        // e.g., /posts/{id} -> /posts/([^/]+)
+        const paramNames: string[] = [];
+        const tokenized = pathTemplate.replace(/\{([^}]+)\}/g, (_, paramName: string) => {
+          paramNames.push(paramName);
+          return `__PARAM_${paramNames.length - 1}__`;
+        });
+
+        const normalizedTemplate = escapeRegex(tokenized).replace(/__PARAM_(\d+)__/g, '([^/]+)');
+        const regex = new RegExp(`^${normalizedTemplate}$`);
+
+        // The entry.path might have query params, strip them for matching
+        const pathOnly = entry.path.split('?')[0];
+
+        const match = pathOnly.match(regex);
+        if (!match) continue;
+
+        selectedEndpoint = {
+          path: pathTemplate,
+          method: entry.method,
+          operation,
+        };
+
+        // Extract path parameters
+        paramNames.forEach((name, index) => {
+          pathParams[name] = match[index + 1];
+        });
+
+        break;
+      }
+    }
+
+    // Parse query params from history entry
     const queryParams: Record<string, string> = {};
-
-    // Extract query params from path
-    url.searchParams.forEach((value, key) => {
-      queryParams[key] = value;
-    });
-
-    // TODO: Extract path params - for now we'll just use the path as-is
-    // This is a limitation - we'd need to match against the OpenAPI spec
-    // to properly extract path params
+    try {
+      // Use entry.path (which includes query params) or entry.request.path if available
+      const fullPath = entry.request.path || entry.path;
+      const url = new URL(fullPath, 'http://dummy.com');
+      url.searchParams.forEach((value, key) => {
+        queryParams[key] = value;
+      });
+    } catch (e) {
+      console.warn('Failed to parse query params from history entry path', e);
+    }
 
     set({
       selectedService: entry.service,
+      selectedEndpoint,
       requestForm: {
         pathParams,
         queryParams,
@@ -127,12 +181,14 @@ export const useAppStore = create<AppState>((set) => ({
         body: entry.request.body ? JSON.stringify(entry.request.body, null, 2) : '',
       },
       lastResponse: entry.response,
+      error: null,
     });
-
-    // Note: We don't set selectedEndpoint here because we'd need to
-    // find it from the spec, which requires async logic
-    // This can be enhanced in a hook
   },
+
+  removeFromHistory: (id) =>
+    set((state) => ({
+      history: state.history.filter((item) => item.id !== id),
+    })),
 
   clearHistory: () => set({ history: [] }),
 }));
