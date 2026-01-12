@@ -9,7 +9,8 @@ type Config struct {
 
 // LoadFromEnv loads configuration from environment variables
 // Expected format:
-//   SPECS_DIR=/path/to/specs (defaults to ./data/specs)
+//
+//	SPECS_DIR=/path/to/specs (defaults to ./data/specs)
 func LoadFromEnv() (*Config, error) {
 	cfg := &Config{
 		SpecsDir: getEnvOrDefault("SPECS_DIR", "./data/specs"),
