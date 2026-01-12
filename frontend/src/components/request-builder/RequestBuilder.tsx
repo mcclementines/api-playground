@@ -37,6 +37,11 @@ export function RequestBuilder() {
     }
   }, [selectedEndpoint, requestForm.pathParams, updateRequestForm]);
 
+  const handleBodyChange = useCallback(
+    (body: string) => updateRequestForm({ body }),
+    [updateRequestForm]
+  );
+
   if (!selectedService || !selectedEndpoint) {
     return null;
   }
@@ -63,11 +68,6 @@ export function RequestBuilder() {
   const spec = specs[selectedService];
   const baseURL = spec?.['x-proxy-config']?.baseURL ?? '';
   const apiTitle = spec?.info?.title ?? selectedService;
-
-  const handleBodyChange = useCallback(
-    (body: string) => updateRequestForm({ body }),
-    [updateRequestForm]
-  );
 
   return (
     <div className="space-y-8 pb-10">
