@@ -110,7 +110,7 @@ func (s *Server) logging(next http.Handler) http.Handler {
 		start := time.Now()
 		next.ServeHTTP(w, r)
 
-		s.logger.Info("request", "method", r.Method, "path", r.URL.Path, "pattern", r.Pattern, "duration", time.Since(start))
+		s.logger.Info("request", "method", r.Method, "path", r.URL.Path, "duration", time.Since(start))
 	})
 }
 
