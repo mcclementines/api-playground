@@ -6,7 +6,7 @@ import { apiClient } from '../api/client';
  * Hook to fetch OpenAPI spec for the selected service
  */
 export function useOpenApiSpec(service: string | null) {
-  const { specs, setSpec, setLoading, setError } = useAppStore();
+  const { specs, setSpec, setLoading, setAppError } = useAppStore();
 
   useEffect(() => {
     if (!service) return;
@@ -22,7 +22,7 @@ export function useOpenApiSpec(service: string | null) {
       if (!service) return;
 
       setLoading(true);
-      setError(null);
+      setAppError(null);
 
       try {
         const spec = await apiClient.getSpec(service);
@@ -33,7 +33,7 @@ export function useOpenApiSpec(service: string | null) {
         }
       } catch (error) {
         if (mounted) {
-          setError(
+          setAppError(
             error instanceof Error ? error.message : `Failed to load spec for ${service}`
           );
           setLoading(false);
@@ -46,7 +46,7 @@ export function useOpenApiSpec(service: string | null) {
     return () => {
       mounted = false;
     };
-  }, [service, specs, setSpec, setLoading, setError]);
+  }, [service, specs, setSpec, setLoading, setAppError]);
 
   return {
     spec: service ? specs[service] : null,

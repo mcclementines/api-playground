@@ -15,7 +15,10 @@ interface AppState {
   // Response State
   lastResponse: ProxyResponse | null;
   loading: boolean;
-  error: string | null;
+
+  // Errors
+  appError: string | null; // services/spec loading errors
+  requestError: string | null; // request validation/execution errors
 
   // History (max 50 entries)
   history: RequestHistoryEntry[];
@@ -29,7 +32,8 @@ interface AppState {
   resetRequestForm: () => void;
   setResponse: (response: ProxyResponse | null) => void;
   setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
+  setAppError: (error: string | null) => void;
+  setRequestError: (error: string | null) => void;
   addToHistory: (entry: RequestHistoryEntry) => void;
   loadFromHistory: (entry: RequestHistoryEntry) => void;
   removeFromHistory: (id: string) => void;
@@ -52,7 +56,8 @@ export const useAppStore = create<AppState>((set) => ({
   requestForm: initialRequestForm,
   lastResponse: null,
   loading: false,
-  error: null,
+  appError: null,
+  requestError: null,
   history: [],
 
   // Actions
@@ -69,7 +74,8 @@ export const useAppStore = create<AppState>((set) => ({
       selectedEndpoint: null, // Reset endpoint when service changes
       requestForm: initialRequestForm,
       lastResponse: null,
-      error: null,
+      appError: null,
+      requestError: null,
     }),
 
   selectEndpoint: (endpoint) =>
@@ -77,7 +83,8 @@ export const useAppStore = create<AppState>((set) => ({
       selectedEndpoint: endpoint,
       requestForm: initialRequestForm, // Reset form when endpoint changes
       lastResponse: null,
-      error: null,
+      appError: null,
+      requestError: null,
     }),
 
   updateRequestForm: (form) =>
@@ -91,7 +98,9 @@ export const useAppStore = create<AppState>((set) => ({
 
   setLoading: (loading) => set({ loading }),
 
-  setError: (error) => set({ error }),
+  setAppError: (error) => set({ appError: error }),
+
+  setRequestError: (error) => set({ requestError: error }),
 
   addToHistory: (entry) =>
     set((state) => {
@@ -180,10 +189,12 @@ export const useAppStore = create<AppState>((set) => ({
         headers: entry.request.headers || {},
         body: entry.request.body ? JSON.stringify(entry.request.body, null, 2) : '',
       },
-      lastResponse: entry.response,
-      error: null,
-    });
-  },
+       lastResponse: entry.response,
+       appError: null,
+       requestError: null,
+     });
+   },
+
 
   removeFromHistory: (id) =>
     set((state) => ({

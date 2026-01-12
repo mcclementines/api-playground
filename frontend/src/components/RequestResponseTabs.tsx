@@ -13,7 +13,7 @@ type TabType = 'request' | 'response';
 
 export function RequestResponseTabs() {
   const [activeTab, setActiveTab] = useState<TabType>('request');
-  const { lastResponse, loading, error, setError } = useAppStore();
+  const { lastResponse, loading, requestError, setRequestError } = useAppStore();
   const { sendRequest } = useProxyRequest();
 
   const handleSendRequest = async () => {
@@ -61,11 +61,11 @@ export function RequestResponseTabs() {
       </div>
 
       {/* Error Display */}
-      {error && (
+      {requestError && (
         <ErrorDisplay
-          message={error}
+          message={requestError}
           onRetry={() => {
-            setError(null);
+            setRequestError(null);
             setActiveTab('request');
           }}
         />

@@ -15,7 +15,7 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { loading, error } = useAppStore();
+  const { loading, appError } = useAppStore();
   const { services } = useServices();
   const { history } = useRequestHistory();
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -65,9 +65,9 @@ export function AppLayout({ children }: AppLayoutProps) {
               <LoadingSpinner />
               <p className="text-sm font-medium text-muted-foreground mt-4 animate-pulse">Initializing services...</p>
             </div>
-          ) : error ? (
+          ) : appError ? (
             <div className="p-6">
-              <ErrorDisplay message={error} />
+              <ErrorDisplay message={appError} />
             </div>
           ) : (
             <Sidebar services={services} />

@@ -6,14 +6,14 @@ import { apiClient } from '../api/client';
  * Hook to fetch and load available services on mount
  */
 export function useServices() {
-  const { services, setServices, setLoading, setError } = useAppStore();
+  const { services, setServices, setLoading, setAppError } = useAppStore();
 
   useEffect(() => {
     let mounted = true;
 
     async function fetchServices() {
       setLoading(true);
-      setError(null);
+      setAppError(null);
 
       try {
         const data = await apiClient.getServices();
@@ -24,7 +24,7 @@ export function useServices() {
         }
       } catch (error) {
         if (mounted) {
-          setError(error instanceof Error ? error.message : 'Failed to load services');
+          setAppError(error instanceof Error ? error.message : 'Failed to load services');
           setLoading(false);
         }
       }
@@ -35,7 +35,7 @@ export function useServices() {
     return () => {
       mounted = false;
     };
-  }, [setServices, setLoading, setError]);
+  }, [setServices, setLoading, setAppError]);
 
   return { services };
 }
