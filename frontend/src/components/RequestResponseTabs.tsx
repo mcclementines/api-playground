@@ -5,6 +5,7 @@ import { ResponseViewer } from './response-viewer/ResponseViewer';
 import { useProxyRequest } from '../hooks/useProxyRequest';
 import { LoadingSpinner } from './shared/LoadingSpinner';
 import { ErrorDisplay } from './shared/ErrorDisplay';
+import { ErrorBoundary } from './shared/ErrorBoundary';
 import { getHttpStatusBadgeStyles } from '../lib/http-ui';
 import { cn } from '../lib/utils';
 
@@ -73,44 +74,48 @@ export function RequestResponseTabs() {
       {/* Tab Content */}
       <div>
         {activeTab === 'request' && (
-          <div className="space-y-6">
-            <RequestBuilder />
+          <ErrorBoundary key="request">
+            <div className="space-y-6">
+              <RequestBuilder />
 
-            {/* Send Button */}
-            <div className="flex items-center gap-3 pt-4 border-t border-border">
-              <button
-                onClick={handleSendRequest}
-                disabled={loading}
-                className="px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <LoadingSpinner size="sm" />
-                    Sending...
+              {/* Send Button */}
+              <div className="flex items-center gap-3 pt-4 border-t border-border">
+                <button
+                  onClick={handleSendRequest}
+                  disabled={loading}
+                  className="px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <LoadingSpinner size="sm" />
+                      Sending...
+                    </span>
+                  ) : (
+                    'Send Request'
+                  )}
+                </button>
+                {loading && (
+                  <span className="text-sm text-muted-foreground">
+                    Waiting for response...
                   </span>
-                ) : (
-                  'Send Request'
                 )}
-              </button>
-              {loading && (
-                <span className="text-sm text-muted-foreground">
-                  Waiting for response...
-                </span>
-              )}
+              </div>
             </div>
-          </div>
+          </ErrorBoundary>
         )}
 
         {activeTab === 'response' && (
-          <div>
-            {lastResponse ? (
-              <ResponseViewer response={lastResponse} />
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No response yet. Send a request to see the response here.</p>
-              </div>
-            )}
-          </div>
+          <ErrorBoundary key="response">
+            <div>
+              {lastResponse ? (
+                <ResponseViewer response={lastResponse} />
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No response yet. Send a request to see the response here.</p>
+                </div>
+              )}
+            </div>
+          </ErrorBoundary>
         )}
       </div>
     </div>

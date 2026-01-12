@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useAppStore } from '../../stores/app-store';
 import { parseParameters, parseRequestBodySchema } from '../../lib/openapi-parser';
 import { extractPathParams } from '../../lib/request-builder';
@@ -63,6 +63,11 @@ export function RequestBuilder() {
   const spec = specs[selectedService];
   const baseURL = spec?.['x-proxy-config']?.baseURL ?? '';
   const apiTitle = spec?.info?.title ?? selectedService;
+
+  const handleBodyChange = useCallback(
+    (body: string) => updateRequestForm({ body }),
+    [updateRequestForm]
+  );
 
   return (
     <div className="space-y-8 pb-10">
@@ -168,7 +173,7 @@ export function RequestBuilder() {
                 <BodySchemaForm
                   schema={bodySchema}
                   value={requestForm.body}
-                  onChange={(body) => updateRequestForm({ body })}
+                  onChange={handleBodyChange}
                 />
               ) : (
                 <BodyEditor
