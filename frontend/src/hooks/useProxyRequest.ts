@@ -12,21 +12,21 @@ export function useProxyRequest() {
     selectedEndpoint,
     requestForm,
     setLoading,
-    setError,
+    setRequestError,
     setResponse,
     addToHistory,
   } = useAppStore();
 
   const sendRequest = async (): Promise<boolean> => {
     if (!selectedService || !selectedEndpoint) {
-      setError('No service or endpoint selected');
+      setRequestError('No service or endpoint selected');
       return false;
     }
 
     // Validate path parameters
     const pathError = validatePathParams(selectedEndpoint.path, requestForm.pathParams);
     if (pathError) {
-      setError(pathError);
+      setRequestError(pathError);
       return false;
     }
 
@@ -35,13 +35,13 @@ export function useProxyRequest() {
       try {
         JSON.parse(requestForm.body);
       } catch {
-        setError('Invalid JSON in request body');
+        setRequestError('Invalid JSON in request body');
         return false;
       }
     }
 
     setLoading(true);
-    setError(null);
+    setRequestError(null);
 
     try {
       // Build the proxy request
@@ -73,7 +73,7 @@ export function useProxyRequest() {
       setLoading(false);
       return true;
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Request failed');
+      setRequestError(error instanceof Error ? error.message : 'Request failed');
       setLoading(false);
       return false;
     }
