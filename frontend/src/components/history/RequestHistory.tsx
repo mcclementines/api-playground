@@ -93,7 +93,7 @@ export function RequestHistory({ isOpen, onClose }: RequestHistoryProps) {
               <h2 className="text-lg font-bold text-foreground">
                 History
               </h2>
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-0.5">
+              <p className="ui-kicker font-semibold text-muted-foreground mt-0.5">
                 {history.length} request{history.length !== 1 ? 's' : ''} stored
               </p>
             </div>
@@ -145,7 +145,9 @@ export function RequestHistory({ isOpen, onClose }: RequestHistoryProps) {
           ) : filteredHistory.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center p-12">
               <p className="text-sm font-semibold text-muted-foreground">No matching fragments</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-2 font-black opacity-70">"{searchQuery}"</p>
+              <p className="text-[11px] text-muted-foreground mt-2 font-medium opacity-70">
+                “<span className="font-mono">{searchQuery}</span>”
+              </p>
             </div>
           ) : (
             <div className="pb-8">
@@ -153,7 +155,7 @@ export function RequestHistory({ isOpen, onClose }: RequestHistoryProps) {
                 entries.length > 0 && (
                   <div key={group} className="mb-6 animate-in fade-in slide-in-from-bottom-2 duration-500 first:duration-300">
                     <div className="px-4 py-2 sticky top-0 bg-transparent z-10">
-                      <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] ml-1">
+                      <h3 className="ui-kicker text-primary ml-1 font-bold tracking-[0.18em]">
                         {group}
                       </h3>
                     </div>

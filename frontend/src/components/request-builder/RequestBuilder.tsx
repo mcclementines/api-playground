@@ -108,7 +108,7 @@ export function RequestBuilder() {
           >
             {selectedEndpoint.method}
           </span>
-          <h2 className="text-xl font-mono font-medium text-foreground tracking-tight break-all">
+          <h2 className="text-xl font-mono font-medium text-foreground tracking-normal break-all">
             {selectedEndpoint.path}
           </h2>
         </div>
@@ -186,7 +186,7 @@ export function RequestBuilder() {
         </div>
 
         <div className="space-y-4 lg:sticky lg:top-4 h-fit">
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
+          <h3 className="ui-kicker font-semibold text-muted-foreground mb-2">
             Request Preview
           </h3>
           {/* Payload Preview */}
