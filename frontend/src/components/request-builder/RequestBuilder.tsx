@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useAppStore } from '../../stores/app-store';
 import { parseParameters, parseRequestBodySchema } from '../../lib/openapi-parser';
 import { extractPathParams } from '../../lib/request-builder';
@@ -36,6 +36,11 @@ export function RequestBuilder() {
       }
     }
   }, [selectedEndpoint, requestForm.pathParams, updateRequestForm]);
+
+  const handleBodyChange = useCallback(
+    (body: string) => updateRequestForm({ body }),
+    [updateRequestForm]
+  );
 
   if (!selectedService || !selectedEndpoint) {
     return null;
@@ -168,7 +173,7 @@ export function RequestBuilder() {
                 <BodySchemaForm
                   schema={bodySchema}
                   value={requestForm.body}
-                  onChange={(body) => updateRequestForm({ body })}
+                  onChange={handleBodyChange}
                 />
               ) : (
                 <BodyEditor
