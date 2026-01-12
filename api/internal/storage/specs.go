@@ -34,8 +34,8 @@ type SpecStore interface {
 // FileSpecStore implements SpecStore using file system
 type FileSpecStore struct {
 	specsDir string
-	specs    map[string]json.RawMessage  // In-memory cache of full specs
-	configs  map[string]*ServiceConfig   // In-memory cache of proxy configs
+	specs    map[string]json.RawMessage // In-memory cache of full specs
+	configs  map[string]*ServiceConfig  // In-memory cache of proxy configs
 }
 
 // NewFileSpecStore creates a new file-based spec store
