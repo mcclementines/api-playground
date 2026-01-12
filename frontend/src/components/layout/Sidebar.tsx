@@ -17,7 +17,7 @@ export function Sidebar({ services }: SidebarProps) {
     <div className="flex flex-col h-full bg-transparent">
       {/* Service Selector */}
       <div className="p-6 border-b border-white/10 bg-white/5 backdrop-blur-md">
-        <label htmlFor="service-select" className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3 ml-1">
+        <label htmlFor="service-select" className="flex items-center gap-2 ui-kicker font-semibold text-muted-foreground mb-3 ml-1">
           <Layers className="w-3.5 h-3.5 text-primary" />
           Workspace Context
         </label>
@@ -64,7 +64,7 @@ export function Sidebar({ services }: SidebarProps) {
         {selectedService && isLoading && (
           <div className="py-20 flex flex-col items-center animate-in fade-in duration-300">
             <LoadingSpinner />
-            <p className="text-xs font-semibold text-muted-foreground mt-5 animate-pulse uppercase tracking-widest">
+            <p className="ui-kicker font-semibold text-muted-foreground mt-5 animate-pulse">
               Parsing Schema...
             </p>
           </div>
@@ -73,7 +73,7 @@ export function Sidebar({ services }: SidebarProps) {
         {selectedService && !isLoading && spec && (
           <div className="py-4 animate-in fade-in slide-in-from-left-2 duration-500">
             <div className="px-6 py-3 sticky top-0 bg-white/40 dark:bg-muted/20 backdrop-blur-xl z-10 border-b border-white/5 mb-2" style={{ WebkitBackdropFilter: 'blur(20px)' }}>
-              <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+              <h2 className="ui-kicker-strong font-bold text-muted-foreground">
                 Available Operations
               </h2>
             </div>

@@ -68,7 +68,7 @@ export function ResponseViewer({ response }: ResponseViewerProps) {
       {/* Response Headers */}
       {showHeaders && (
         <div className="bg-muted/30 border border-border rounded-lg p-4 font-mono text-xs overflow-x-auto animate-in fade-in slide-in-from-top-2">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Response Headers</h3>
+          <h3 className="ui-kicker font-semibold text-muted-foreground mb-3">Response Headers</h3>
           <div className="space-y-1.5">
             {Object.entries(response.headers).map(([key, values]) => (
               <div key={key} className="flex gap-4 group">

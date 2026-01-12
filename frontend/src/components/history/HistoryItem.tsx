@@ -65,7 +65,7 @@ export function HistoryItem({ entry, onReplay, onDelete }: HistoryItemProps) {
         {/* Method Badge */}
         <span
           className={cn(
-            "px-2.5 py-1 text-[9px] uppercase font-black rounded-lg border flex-shrink-0 mt-0.5 tracking-wider shadow-sm transition-transform group-hover:scale-110",
+            "px-2.5 py-1 text-[10px] uppercase font-bold rounded-lg border flex-shrink-0 mt-0.5 tracking-[0.12em] shadow-sm transition-transform group-hover:scale-110",
             methodStyles
           )}
         >
@@ -80,7 +80,7 @@ export function HistoryItem({ entry, onReplay, onDelete }: HistoryItemProps) {
             </span>
             <span
               className={cn(
-                'text-[10px] font-black font-mono px-1.5 py-0.5 rounded-md border shadow-sm',
+                'text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-md border shadow-sm',
                 'bg-muted/40 border-border',
                 getHttpStatusTextStyles(entry.status)
               )}

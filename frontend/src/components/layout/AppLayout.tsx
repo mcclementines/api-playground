@@ -32,7 +32,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <h1 className="text-base font-bold tracking-tight text-foreground">
               API Playground
             </h1>
-            <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
+            <p className="ui-kicker text-muted-foreground font-medium tracking-[0.16em]">
               v1.0.0 • Developer Console
             </p>
           </div>
