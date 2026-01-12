@@ -1,3 +1,3 @@
 module jonathanmcclement.com/playground
 
-go 1.22
+go 1.23
